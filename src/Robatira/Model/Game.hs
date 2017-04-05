@@ -93,8 +93,6 @@ throwingStackToDealingStack game = do
   let newDs = shuffledStack
   return game { dealingStack = newDs, throwingStack = newTs }
 
-helper (Just game) = game
-
 -- The game is over when the current player has no cards left after throwing a 
 -- card on the throwing stack. In this case the current player is the winner.
 isGameOver :: Game -> Bool
