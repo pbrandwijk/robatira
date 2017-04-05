@@ -39,16 +39,17 @@ start = do
   play initializedGame
   
 
--- Playing the game means the current player either picks a card from the dealing
--- stack or throws a legal card on the throwing stack. 
+-- Playing the game means the current player either picks a card from the 
+-- dealing stack or throws a legal card on the throwing stack. 
 -- If the current player after this has no more cards left, the game is over.
--- Else, the next player on the list becomes the current player and the whole process
--- reiterates
+-- Else, the next player on the list becomes the current player and the whole 
+-- process reiterates
 play :: Game -> IO ()
 play game = do
   putStrLn $ show game
 
--- Current player takes top card from dealing stack and adds it to their own hand 
+-- Current player takes top card from dealing stack and adds it to their 
+-- own hand 
 takeCard :: Game -> Game
 takeCard (Game (topcard:cs) ts (Player ptype name hand) ops) = Game {
   dealingStack = cs,
@@ -56,8 +57,8 @@ takeCard (Game (topcard:cs) ts (Player ptype name hand) ops) = Game {
   currentPlayer = (Player ptype name (topcard:hand)),
   otherPlayers = ops}
 
--- Current player goes to end of other player list. Head player of other player list
--- becomes new current player
+-- Current player goes to end of other player list. Head player of other player 
+-- list becomes new current player
 nextPlayer :: Game -> Game
 nextPlayer (Game ds ts cp ops) = Game { 
   dealingStack = ds,
@@ -65,5 +66,7 @@ nextPlayer (Game ds ts cp ops) = Game {
   currentPlayer = head ops,
   otherPlayers = (tail ops) ++ [cp] }                                      
 
+-- The game is over when the current player has no cards left after throwing a 
+-- card on the throwing stack. In this case the current player is the winner.
 isGameOver :: Game -> Bool
 isGameOver game = hand (currentPlayer game) == []
