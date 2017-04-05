@@ -80,7 +80,20 @@ nextPlayer (Game ds ts cp ops) = Game {
   dealingStack = ds,
   throwingStack = ts,
   currentPlayer = head ops,
-  otherPlayers = (tail ops) ++ [cp] }                                      
+  otherPlayers = (tail ops) ++ [cp] }
+
+-- Take all cards of throwing stack except the top card. Join them with the
+-- dealing stack and shuffle the whole dealing stack.
+throwingStackToDealingStack :: Game -> IO Game
+throwingStackToDealingStack game = do
+  let ts = throwingStack game
+  let newStack = tail ts
+  let newTs = [head ts]
+  shuffledStack <- shuffle $ (dealingStack game) ++ newStack
+  let newDs = shuffledStack
+  return game { dealingStack = newDs, throwingStack = newTs }
+
+helper (Just game) = game
 
 -- The game is over when the current player has no cards left after throwing a 
 -- card on the throwing stack. In this case the current player is the winner.
