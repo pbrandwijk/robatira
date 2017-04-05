@@ -2,6 +2,7 @@ module Robatira.Model.Game
 
 where
 
+import Data.List (delete)
 import Robatira.Model.Cards
 import Robatira.Util.Shuffle (shuffle)
 
@@ -56,6 +57,21 @@ takeCard (Game (topcard:cs) ts (Player ptype name hand) ops) = Game {
   throwingStack = ts,
   currentPlayer = (Player ptype name (topcard:hand)),
   otherPlayers = ops}
+
+-- Current player throws a card from their hand on to the top of the 
+-- throwing stack. Function is wrapped in Maybe monad to handle the case
+-- where the throwing card is not part of the player's hand.
+throwCard :: Card -> Game -> Maybe Game
+throwCard card game | elem card playerHand = Just game { 
+                                    throwingStack = (card:gameTs),
+                                    currentPlayer = player { hand = newHand } }
+                    | otherwise = Nothing
+  where 
+    playerHand = hand $ currentPlayer game 
+    gameTs = throwingStack game
+    player = currentPlayer game
+    newHand = delete card playerHand
+    
 
 -- Current player goes to end of other player list. Head player of other player 
 -- list becomes new current player
