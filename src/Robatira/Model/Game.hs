@@ -47,3 +47,23 @@ start = do
 play :: Game -> IO ()
 play game = do
   putStrLn $ show game
+
+-- Current player takes top card from dealing stack and adds it to their own hand 
+takeCard :: Game -> Game
+takeCard (Game (topcard:cs) ts (Player ptype name hand) ops) = Game {
+  dealingStack = cs,
+  throwingStack = ts,
+  currentPlayer = (Player ptype name (topcard:hand)),
+  otherPlayers = ops}
+
+-- Current player goes to end of other player list. Head player of other player list
+-- becomes new current player
+nextPlayer :: Game -> Game
+nextPlayer (Game ds ts cp ops) = Game { 
+  dealingStack = ds,
+  throwingStack = ts,
+  currentPlayer = head ops,
+  otherPlayers = (tail ops) ++ [cp] }                                      
+
+isGameOver :: Game -> Bool
+isGameOver game = hand (currentPlayer game) == []
