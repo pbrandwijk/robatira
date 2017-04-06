@@ -4,9 +4,11 @@ where
 
 import Robatira.Model.Cards
 import Robatira.Model.Actions
-import Robatira.Util.Shuffle (shuffle)
+import Robatira.Model.Exceptions
+import Robatira.Util.Shuffle
 
 import Data.List (delete)
+import Data.Either
 
 data PlayerType = Human | Computer deriving (Show)
 
@@ -20,17 +22,37 @@ data Game = Game { dealingStack :: [Card]
                  , otherPlayers :: [Player] } deriving (Show)
 
 
--- Initialize with a shuffled deck for a proper game
-initGame :: [Card] -> Game
-initGame startDeck = Game startStack throwingStack player1 [player2]
+-- Initialize with a stack of cards and a list of players
+-- Note: As a rule of thumb, for a proper game the stack of cards should be at
+--       least three times as much as number of cards needed to deal to the 
+--       players.
+--       Also note that for a proper game the stack of cards should consist of
+--       of one or more full decks and should be well shuffled.
+initGame :: [Card] -> [Player] -> Either Exception Game
+initGame startDeck players
+    | hasNotEnoughCards = Left (NotEnoughCardsException ("Not enough cards "
+                ++ "for a proper game!"))
+    | otherwise = Right (Game startStack throwingStack firstPlayer
+                            otherPlayers)
   where
-   (hand1, deckAfterHand1) = splitAt 7 startDeck
-   (hand2, deckAfterHand2) = splitAt 7 deckAfterHand1
-   (singleCardStack, deckAfterthrowingStack) = splitAt 1 deckAfterHand2
-   throwingStack = singleCardStack
-   startStack = deckAfterthrowingStack
-   player1 = Player Human "Alice" hand1
-   player2 = Player Human "Bob" hand2
+   hasNotEnoughCards = length players * handSizeAtStart * 3 > length startDeck
+   (dealtPlayers,cardsAfterDealing) = dealCardsToEachPlayer players [] startDeck
+   throwingStack = [head cardsAfterDealing]
+   startStack = tail cardsAfterDealing
+   firstPlayer = head dealtPlayers
+   otherPlayers = tail dealtPlayers
+
+-- Number of cards that each player is dealt at the start of the game
+handSizeAtStart = 7
+
+-- Helper function to deal the cards to the players
+dealCardsToEachPlayer :: [Player] -> [Player] -> [Card] -> ([Player],[Card])
+dealCardsToEachPlayer [] ds cards = (ds, cards)
+dealCardsToEachPlayer (p:ps) ds cards = 
+  dealCardsToEachPlayer ps (dp:ds) newCards
+    where
+      (newHand, newCards) = splitAt handSizeAtStart cards
+      dp = p { hand = newHand }
 
 -- Current player takes top card from dealing stack and adds it to their 
 -- own hand 
