@@ -66,11 +66,12 @@ takeCard (Game (topcard:cs) ts (Player ptype name hand) ops) = Game {
 -- Current player throws a card from their hand on to the top of the 
 -- throwing stack. Function is wrapped in Maybe monad to handle the case
 -- where the throwing card is not part of the player's hand.
-throwCard :: Card -> Game -> Maybe Game
-throwCard card game | elem card playerHand = Just game { 
+throwCard :: Card -> Game -> Either Exception Game
+throwCard card game | elem card playerHand = Right game { 
                                     throwingStack = (card:gameTs),
                                     currentPlayer = player { hand = newHand } }
-                    | otherwise = Nothing
+                    | otherwise = Left (ThrowingCardNotInHandException
+            ("Cannot throw card " ++ show card ++ "when not in hand!"))
   where 
     playerHand = hand $ currentPlayer game 
     gameTs = throwingStack game

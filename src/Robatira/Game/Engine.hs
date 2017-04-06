@@ -5,6 +5,7 @@ where
 import Robatira.Model.Cards
 import Robatira.Model.Game
 import Robatira.Model.Actions
+import Robatira.Model.Exceptions
 import Robatira.Util.Shuffle (shuffle)
 
 -- Starting the game is setting up the initial game state and starting off the 
@@ -32,14 +33,14 @@ play game = do
   let action = getPlayerAction (currentPlayer game)
   let newGameState = performPlayerAction action game
   case newGameState of
-    (Nothing) -> putStrLn "Player action could not be performed"
-    (Just g) -> do
-                 putStrLn $ show g
-                 play g
+    Left e -> putStrLn (show e)
+    Right game -> do
+                 putStrLn $ show game
+                 play game
 
 getPlayerAction :: Player -> Action
 getPlayerAction player = Take
 
-performPlayerAction :: Action -> Game -> Maybe Game
+performPlayerAction :: Action -> Game -> Either Exception Game
 performPlayerAction (Throw card) game = throwCard card game
-performPlayerAction (Take) game = Just (takeCard game)
+performPlayerAction (Take) game = Right (takeCard game)
