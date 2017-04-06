@@ -56,8 +56,10 @@ dealCardsToEachPlayer (p:ps) ds cards =
 
 -- Current player takes top card from dealing stack and adds it to their 
 -- own hand 
-takeCard :: Game -> Game
-takeCard (Game (topcard:cs) ts (Player ptype name hand) ops) = Game {
+takeCard :: Game -> Either Exception Game
+takeCard (Game [] _ _ _) = Left (EmptyDealingStackException 
+            "Empty dealing stack!")
+takeCard (Game (topcard:cs) ts (Player ptype name hand) ops) = Right Game {
   dealingStack = cs,
   throwingStack = ts,
   currentPlayer = (Player ptype name (topcard:hand)),

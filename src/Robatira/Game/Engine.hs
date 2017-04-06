@@ -43,4 +43,4 @@ getPlayerAction player = Take
 
 performPlayerAction :: Action -> Game -> Either Exception Game
 performPlayerAction (Throw card) game = throwCard card game
-performPlayerAction (Take) game = Right (takeCard game)
+performPlayerAction (Take) game = takeCard game
