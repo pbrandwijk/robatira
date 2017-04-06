@@ -40,8 +40,8 @@ backOfCardUnicode :: Int
 backOfCardUnicode = 0x1F0A0
 
 
-allSuits = [Hearts ..]
-allRanks = [Two ..]
+allSuits = [Spades ..]
+allRanks = [Ace ..]
 allJokers = [RedJoker ..]
 
 frenchStandard52Plus3Jokers :: [Card]
