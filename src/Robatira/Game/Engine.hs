@@ -33,14 +33,20 @@ play game = do
   let action = getPlayerAction (currentPlayer game)
   let newGameState = performPlayerAction action game
   case newGameState of
+    Left (EmptyDealingStackException msg game) -> do
+      putStrLn "Dealing stack went empty, refilling"
+      gameNewDealingStack <- throwingStackToDealingStack game
+      case gameNewDealingStack of
+        Left e -> putStrLn (show e)
+        Right game -> play game
     Left e -> putStrLn (show e)
     Right game -> do
-                 putStrLn $ show game
-                 play game
+      putStrLn $ show game
+      play game
 
 getPlayerAction :: Player -> Action
 getPlayerAction player = Take
 
-performPlayerAction :: Action -> Game -> Either Exception Game
+performPlayerAction :: Action -> Game -> Either (Exception Game) Game
 performPlayerAction (Throw card) game = throwCard card game
 performPlayerAction (Take) game = takeCard game

@@ -28,7 +28,7 @@ data Game = Game { dealingStack :: [Card]
 --       players.
 --       Also note that for a proper game the stack of cards should consist of
 --       of one or more full decks and should be well shuffled.
-initGame :: [Card] -> [Player] -> Either Exception Game
+initGame :: [Card] -> [Player] -> Either (Exception Game) Game
 initGame startDeck players
     | hasNotEnoughCards = Left (NotEnoughCardsException ("Not enough cards "
                 ++ "for a proper game!"))
@@ -56,9 +56,9 @@ dealCardsToEachPlayer (p:ps) ds cards =
 
 -- Current player takes top card from dealing stack and adds it to their 
 -- own hand 
-takeCard :: Game -> Either Exception Game
-takeCard (Game [] _ _ _) = Left (EmptyDealingStackException 
-            "Empty dealing stack!")
+takeCard :: Game -> Either (Exception Game) Game
+takeCard (Game [] ts cp ops) = Left (EmptyDealingStackException 
+            "Empty dealing stack!" (Game [] ts cp ops))
 takeCard (Game (topcard:cs) ts (Player ptype name hand) ops) = Right Game {
   dealingStack = cs,
   throwingStack = ts,
@@ -68,7 +68,7 @@ takeCard (Game (topcard:cs) ts (Player ptype name hand) ops) = Right Game {
 -- Current player throws a card from their hand on to the top of the 
 -- throwing stack. Function is wrapped in Maybe monad to handle the case
 -- where the throwing card is not part of the player's hand.
-throwCard :: Card -> Game -> Either Exception Game
+throwCard :: Card -> Game -> Either (Exception Game) Game
 throwCard card game | elem card playerHand = Right game { 
                                     throwingStack = (card:gameTs),
                                     currentPlayer = player { hand = newHand } }
@@ -92,14 +92,18 @@ nextPlayer (Game ds ts cp ops) = Game {
 
 -- Take all cards of throwing stack except the top card. Join them with the
 -- dealing stack and shuffle the whole dealing stack.
-throwingStackToDealingStack :: Game -> IO Game
+throwingStackToDealingStack :: Game -> IO (Either (Exception Game) Game)
 throwingStackToDealingStack game = do
   let ts = throwingStack game
   let newStack = tail ts
   let newTs = [head ts]
   shuffledStack <- shuffle $ (dealingStack game) ++ newStack
   let newDs = shuffledStack
-  return game { dealingStack = newDs, throwingStack = newTs }
+  let result = if newStack == [] 
+               then Left (NoCardsToRefillDealingStack ("Too few cards on "
+                    ++ "throwing stack!")) 
+               else Right game { dealingStack = newDs, throwingStack = newTs }
+  return result
 
 -- The game is over when the current player has no cards left after throwing a 
 -- card on the throwing stack. In this case the current player is the winner.

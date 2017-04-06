@@ -2,7 +2,10 @@ module Robatira.Model.Exceptions
 
 where
 
-data Exception = NotEnoughCardsException String 
-               | ThrowingCardNotInHandException String
-               | EmptyDealingStackException String
+type ExceptionMessage = String
+
+data Exception a = NotEnoughCardsException ExceptionMessage 
+               | ThrowingCardNotInHandException ExceptionMessage
+               | EmptyDealingStackException ExceptionMessage a
+               | NoCardsToRefillDealingStack ExceptionMessage
                  deriving (Show, Eq)
