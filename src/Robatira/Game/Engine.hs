@@ -12,8 +12,14 @@ import Robatira.Util.Shuffle (shuffle)
 start :: IO ()
 start = do
   shuffledDeck <- shuffle frenchStandard52Plus3Jokers
-  let initializedGame = initGame shuffledDeck
-  play initializedGame
+  let players = [createHumanPlayer "Esther", createHumanPlayer "Pieter"]
+  let initializedGame = initGame shuffledDeck players
+  case initializedGame of
+    Right game -> play game
+    Left e -> putStrLn (show e)
+
+createHumanPlayer :: String -> Player
+createHumanPlayer name = Player Human name []
   
 
 -- Playing the game means the current player either picks a card from the 
