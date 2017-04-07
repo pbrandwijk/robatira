@@ -73,7 +73,7 @@ throwCard card game | elem card playerHand = Right game {
                                     throwingStack = (card:gameTs),
                                     currentPlayer = player { hand = newHand } }
                     | otherwise = Left (ThrowingCardNotInHandException
-            ("Cannot throw card " ++ show card ++ "when not in hand!"))
+            ("Cannot throw card " ++ show card ++ " when not in hand!"))
   where 
     playerHand = hand $ currentPlayer game 
     gameTs = throwingStack game
