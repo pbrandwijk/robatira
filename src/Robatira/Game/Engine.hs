@@ -6,6 +6,7 @@ import Robatira.Model.Cards
 import Robatira.Model.Game
 import Robatira.Model.Actions
 import Robatira.Model.Exceptions
+import Robatira.Game.InputParser
 import Robatira.Util.Shuffle (shuffle)
 
 -- Starting the game is setting up the initial game state and starting off the 
@@ -30,7 +31,8 @@ createHumanPlayer name = Player Human name []
 -- process reiterates
 play :: Game -> IO ()
 play game = do
-  let action = getPlayerAction (currentPlayer game)
+  putStrLn $ show game
+  action <- getPlayerAction (currentPlayer game)
   let newGameState = performPlayerAction action game
   case newGameState of
     Left (EmptyDealingStackException msg game) -> do
@@ -38,14 +40,15 @@ play game = do
       gameNewDealingStack <- throwingStackToDealingStack game
       case gameNewDealingStack of
         Left e -> putStrLn (show e)
-        Right game -> play game
+        Right game -> play $ nextPlayer game
     Left e -> putStrLn (show e)
     Right game -> do
-      putStrLn $ show game
-      play game
+      play $ nextPlayer game
 
-getPlayerAction :: Player -> Action
-getPlayerAction player = Take
+getPlayerAction :: Player -> IO Action
+getPlayerAction (Player Human _ _) = do
+  command <- getLine
+  return $ commandToAction command
 
 performPlayerAction :: Action -> Game -> Either (Exception Game) Game
 performPlayerAction (Throw card) game = throwCard card game
