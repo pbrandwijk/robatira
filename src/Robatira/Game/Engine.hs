@@ -41,6 +41,11 @@ play game = do
       case gameNewDealingStack of
         Left e -> putStrLn (show e)
         Right game -> play $ nextPlayer game
+    Left (PlayerResignsException msg game) -> do
+      putStrLn ("Taking current player out of game, adding remaining cards " ++
+        "to game and reshuffling stack")
+      gameCurrentPlayerRemoved <- removeCurrentPlayer game
+      play $ gameCurrentPlayerRemoved
     Left e -> putStrLn (show e)
     Right game -> do
       play $ nextPlayer game
@@ -53,3 +58,4 @@ getPlayerAction (Player Human _ _) = do
 performPlayerAction :: Action -> Game -> Either (Exception Game) Game
 performPlayerAction (Throw card) game = throwCard card game
 performPlayerAction (Take) game = takeCard game
+performPlayerAction (Resign) game = resign game

@@ -54,6 +54,12 @@ dealCardsToEachPlayer (p:ps) ds cards =
       (newHand, newCards) = splitAt handSizeAtStart cards
       dp = p { hand = newHand }
 
+-- Current player resigns and is removed from game and current players cards are
+-- added to dealing stack and dealing stack is shuffled. If only one player  is 
+-- left in the game then that player wins.
+resign :: Game -> Either (Exception Game) Game
+resign game = Left (PlayerResignsException "Current player resigns!" game)
+
 -- Current player takes top card from dealing stack and adds it to their 
 -- own hand 
 takeCard :: Game -> Either (Exception Game) Game
@@ -105,7 +111,18 @@ throwingStackToDealingStack game = do
                else Right game { dealingStack = newDs, throwingStack = newTs }
   return result
 
+-- Remove the current player from the game state and add the cards of the 
+-- current player to the dealing stack and shuffle the dealing stack.
+removeCurrentPlayer :: Game -> IO Game
+removeCurrentPlayer (Game ds ts cp ops) = do
+  nDs <- shuffle $ ds ++ (hand cp)
+  let nCp = head ops
+  let nOps = tail ops
+  return (Game nDs ts nCp nOps)
+
 -- The game is over when the current player has no cards left after throwing a 
 -- card on the throwing stack. In this case the current player is the winner.
+-- The other option of winning occurs if all but one player have resigned. In
+-- this case the last remaining player is the winner.
 isGameOver :: Game -> Bool
 isGameOver game = hand (currentPlayer game) == []

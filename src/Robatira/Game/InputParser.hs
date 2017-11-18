@@ -12,6 +12,7 @@ commandToAction :: String -> Action
 commandToAction "take" = Take
 commandToAction (rank:suit:[]) = Throw (Regular (chrToSuit suit)
   (chrToRank rank))
+commandToAction "resign" = Resign
 commandToAction _ = Take
 
 chrToSuit :: Char -> Suit
